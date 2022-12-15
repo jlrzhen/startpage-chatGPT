@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      text-align: center; /* Center the tiles on the page */
+    }
+
+    /* Neumorphic design styles */
+    .tile {
+      background-color: #ffffff;
+      box-shadow: 3px 3px 8px rgba(0, 0, 0, 0.1), -3px -3px 8px rgba(255, 255, 255, 0.5);
+      border-radius: 10px;
+      padding: 20px;
+      margin: 20px;
+      display: inline-block; /* Make the tiles inline-block elements */
+      width: 200px; /* Set the width and height to make them squares */
+      height: 200px;
+    }
+
+    /* Style for the link inside the tile */
+    .tile a {
+      text-decoration: none;
+      color: #000000;
+      display: block;
+      margin: auto;
+      height: 200px; /* Set the height of the link to the same height as the tile */
+      line-height: 200px; /* Set the line-height to the same height as the tile to vertically center the text */
+    }
+  </style>
+</head>
+<body>
+  <div class="tile">
+    <a href="https://www.example.com">Example link</a>
+  </div>
+
+  <!-- Input form for adding links -->
+  <form onsubmit="return addLink()">
+    <label>Link: <input type="text" id="link" /></label>
+    <input type="submit" value="Add link" />
+  </form>
+
+  <!-- Container for the tiles -->
+  <div id="container"></div>
+
+  <script>
+    // Function to add a link to the page
+    function addLink() {
+      // Get the value of the input field and add as tile
+      link = document.getElementById("link").value
+      addTile(link)
+
+      // Save the link in the 'links' cookie
+      var links = getCookie("links");
+      if (links) {
+        // If the 'links' cookie already exists, append the new link to the list of links in the cookie
+        links += "," + link;
+      } else {
+        // If the 'links' cookie does not exist, create it with the new link as the first entry
+        links = link;
+      }
+      setCookie("links", links, 30);
+
+      // Clear the input field
+      document.getElementById("link").value = "";
+
+      // Prevent the form from submitting
+      return false;
+    }
+
+    // Function to add a tile to the page
+    function addTile(link) {
+      // Create a new tile
+      var tile = document.createElement("div");
+      tile.className = "tile";
+
+      // Create a link element and set its href attribute to the entered link
+      var a = document.createElement("a");
+      a.setAttribute("href", link);
+      a.innerHTML = link;
+
+      // Add the link to the tile
+      tile.appendChild(a);
+
+      // Create a delete button
+      var button = document.createElement("button");
+      button.innerHTML = "Delete";
+
+      // Add an onclick event listener to the delete button
+      // that calls the deleteTile() function when the button is clicked
+      button.addEventListener("click", function() {
+        deleteTile(tile);
+      });
+
+      // Add the delete button to the tile
+      tile.appendChild(button);
+
+      // Add the tile to the page
+      document.getElementById("container").appendChild(tile);
+    }
+
+    // Function to set a cookie
+    function setCookie(name, value, days) {
+      // Get the current date
+      var date = new Date();
+
+      // Set the expiration date of the cookie to the specified number of days from now
+      date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+
+      // Set the cookie with the name, value, and expiration date
+      document.cookie = name + "=" + value + "; expires=" + date.toUTCString() + "; path=/";
+    }
+
+    // Function to get a cookie
+    function getCookie(name) {
+      // Split the cookies string at the ';' character to get an array of cookie name-value pairs
+      var cookies = document.cookie.split(";");
+
+      // Loop through the cookie name-value pairs
+      for (var i = 0; i < cookies.length; i++) {
+        // Split the current cookie name-value pair at the '=' character to get the cookie name and value
+        var cookie = cookies[i].split("=");
+
+        // Trim any whitespace from the cookie name
+        cookie[0] = cookie[0].trim();
+
+        // If the cookie name matches the specified name, return the cookie value
+        if (cookie[0] === name) {
+          return cookie[1];
+        }
+      }
+
+      // If no cookie with the specified name was found, return null
+      return null;
+    }
+
+    // Function to delete a tile
+    function deleteTile(tile) {
+      // Remove the tile from the page
+      tile.parentNode.removeChild(tile);
+
+      // Get the list of links from the 'links' cookie
+      var links = getCookie("links").split(",");
+
+      // Find the index of the link in the list of links
+      var index = links.indexOf(tile.firstChild.getAttribute("href"));
+
+      // Remove the link from the list of links
+      links.splice(index, 1);
+
+      // Save the updated list of links to the 'links' cookie
+      setCookie("links", links.join(","), 30);
+    }
+
+    // When the page loads, get the list of links from the 'links' cookie
+    var links = getCookie("links");
+    console.log(links)
+
+    // If the 'links' cookie exists, create and add tiles for each of the links in the cookie
+    if (links) {
+      // Split the list of links at the ',' character to get an array of individual links
+      var linkArray = links.split(",");
+
+      // Loop through the array of links
+      for (var i = 0; i < linkArray.length; i++) {
+        // Get the current link
+        var link = linkArray[i];
+
+        // Add the tile to the page
+        addTile(link);
+      }
+    }
+  </script>
+</body>
+</html>
